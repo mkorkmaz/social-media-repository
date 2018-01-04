@@ -1,0 +1,19 @@
+<?php
+declare(strict_types=1);
+
+return [
+    'twitter' => [
+        'oauth_access_token' => '',
+        'oauth_access_token_secret' => '',
+        'consumer_key' => '',
+        'consumer_secret' => ''
+    ],
+    'instagram' => [
+        'username' => '',
+        'password' => ''
+    ],
+    'mongodb' => [
+        'host' => '127.0.0.1',
+        'db' => 'sm_repo'
+    ]
+];
