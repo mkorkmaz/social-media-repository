@@ -115,8 +115,6 @@ class InstaService
 
     public function getPosts(string $hastag, string $minId): array
     {
-
-
         return $this->repository->getPosts($hastag, $minId);
     }
 }

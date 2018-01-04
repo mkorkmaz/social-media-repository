@@ -24,7 +24,7 @@ $app->get('/posts/{platform}/{hashtag}', function (Request $request, Response $r
     $status = 200;
     $platform  = $args['platform'];
     $hashtag = $args['hashtag'];
-    $minId = $request->getParam('minId', '0a4e8fda395fdc23c226a323');
+    $minId = $request->getParam('minId', '504e8fda395fdc23c226a323');
     $serviceName = ucfirst($platform).'Service';
     if (!$this->has($serviceName)) {
         return $response->withJson(['status' => 404, 'message' => 'Service '.$serviceName.' not found'], 404);

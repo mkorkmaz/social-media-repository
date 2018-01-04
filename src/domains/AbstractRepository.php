@@ -25,6 +25,9 @@ abstract class AbstractRepository implements RepositoryInterface
      */
     protected function getPostsByPlatformId(int $platformId, string $hashtag, string $minId)
     {
+        if (!preg_match('/^[a-f\d]{24}$/i', $minId)) {
+            return ['total' => 0, 'data' => null, 'message' => 'Invalid ObjectId:' . $minId];
+        }
         return $this->soupmix->find(
             self::COLLECTION_NAME,
             [
