@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace SocialMediaRepository\Domain\Instas;
 
-use InstagramScraper\Instagram;
+//use InstagramScraper\Instagram;
+use InstagramAPI\Instagram;
+use InstagramAPI\Signatures;
 
 class InstaService
 {
@@ -11,15 +13,17 @@ class InstaService
 
     private $repository;
 
+    private $config;
 
     public function __construct(InstaRepository $repository, $config)
     {
-        $this->instagramHandler = Instagram::withCredentials(
+        $this->instagramHandler = new Instagram(); /* Instagram::withCredentials(
             $config['instagram']['username'],
             $config['instagram']['password'],
             '/tmp'
-        );
+        );*/
         $this->repository = $repository;
+        $this->config = $config['instagram'];
     }
 
     /**
@@ -47,63 +51,62 @@ class InstaService
      */
     public function getInstasByHashtag(string $hashtag, int $limit) : array
     {
-        $this->instagramHandler->login();
+        $posts = [];
         try {
-            $posts = $this->instagramHandler->getMediasByTag($hashtag, $limit);
-            $populatedPosts =  $this->populateInstasWithUserInfo($posts);
-            $this->savePosts($hashtag, $populatedPosts);
-            return $populatedPosts;
+            $this->instagramHandler->login($this->config['username'], $this->config['password']);
+            $rankToken = Signatures::generateUUID();
+            $maxId = null;
+            $count = 0;
+            do {
+                echo "in do\n";
+                echo ((string) $maxId)." <- maxId\n";
+                $response = $this->instagramHandler->hashtag->getFeed($hashtag, $rankToken, $maxId);
+                $items = $response->getItems();
+                foreach ($items as $item) {
+                    $count++;
+                    $post = $this->extractData(json_decode(json_encode($item), JSON_OBJECT_AS_ARRAY));;
+                    $posts[] = $post;
+                }
+                $maxId = $response->getNextMaxId();
+                echo "Sleeping for 5s...\n";
+                sleep(5);
+            } while ($count < $limit);
+
+            var_dump($posts);
+
+            if (count($posts)>0) {
+                $this->savePosts($hashtag, $posts);
+            }
+            return $posts;
         } catch (\Exception $e) {
+            return ['status' => 404, 'reason' => $e->getMessage()];
+        } catch (\Error $e) {
             return ['status' => 404, 'reason' => $e->getMessage()];
         }
     }
 
-    /**
-     * @param array                                $posts
-     * @param \InstagramScraper\Model\Account|null $accountInfoProvided
-     * @return array
-     * @throws \InstagramScraper\Exception\InstagramException
-     * @throws \InvalidArgumentException
-     */
-    private function populateInstasWithUserInfo(array $posts, $accountInfoProvided = null) : array
+    private function extractData(array $post) : array
     {
-        $populatedPosts = [];
-        /**
-         * @param \InstagramScraper\Model\Media $post
-         */
-        foreach ($posts as $post) {
-            $ownerId = $post->getOwnerId();
-            $accountInfo = $accountInfoProvided ?? $this->instagramHandler->getAccountById($ownerId);
-            $populatedPosts[] = [
-                'postId' => $post->getId(),
-                'shortCode' => $post->getShortCode(),
-                'createdTime' => $post->getCreatedTime(),
-                'type' => $post->getType(),
-                'link' => $post->getLink(),
-                'imageThumbnailUrl' => $post->getImageThumbnailUrl(),
-                'imageHighResolutionUrl' => $post->getImageHighResolutionUrl(),
-                'caption' => $post->getCaption(),
-                'videoStandardResolutionUrl' => $post->getVideoStandardResolutionUrl(),
-                'videoViews' => $post->getVideoViews(),
-                'ownerId' => $post->getOwnerId(),
-                'likesCount' => $post->getLikesCount(),
-                'locationId' => $post->getLocationId(),
-                'locationName' => $post->getLocationName(),
-                'commentsCount' => $post->getCommentsCount(),
-                'owner' => [
-                    'username' => $accountInfo->getUsername(),
-                    'fullName' => $accountInfo->getFullName(),
-                    'profilePicUrl' => $accountInfo->getProfilePicUrl(),
-                    'biography' => $accountInfo->getBiography(),
-                    'externalUrl' => $accountInfo->getExternalUrl(),
-                    'followsCount' => $accountInfo->getFollowsCount(),
-                    'followedByCount' => $accountInfo->getFollowedByCount(),
-                    'mediaCount' => $accountInfo->getMediaCount(),
-                    'isPrivate' => $accountInfo->isPrivate()
-                ]
-            ];
-        }
-        return $populatedPosts;
+        return [
+            'postId' => $post['pk'],
+            'shortCode' => $post['code'],
+            'createdTime' => $post['taken_at'],
+            'type' => $post['media_type']===1? 'image': 'other',
+            'link' => 'https://www.instagram.com/p/'.$post['code'],
+            'imageThumbnailUrl' => $post['image_versions2'][1]['url'],
+            'imageHighResolutionUrl' => $post['image_versions2'][0]['url'],
+            'caption' => $post['caption']['text'],
+            'ownerId' => $post['user']['pk'],
+            'likesCount' => $post['like_count'],
+            'locationId' => $post['location']['facebook_places_id'] ?? '',
+            'locationName' => $post['location']['name'] ?? '',
+            'owner' => [
+                'username' => $post['user']['username'],
+                'fullName' => $post['user']['full_name'],
+                'profilePicUrl' => $post['user']['profile_pic_url'],
+                'isPrivate' => (int) $post['user']['is_private']
+            ]
+        ];
     }
 
     private function savePosts(string $hashtag, array $posts) : void

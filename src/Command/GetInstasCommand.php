@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-
 namespace SocialMediaRepository\Command;
 
 use Selami\Console\Command as SelamiCommand;
