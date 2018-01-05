@@ -55,6 +55,6 @@ class GetInstasCommand extends SelamiCommand
         if ($queryType === 'user') {
             return $instaService->getInstasByUsername($keyword);
         }
-        return $instaService->getInstasByHashtag($keyword, 24);
+        return $instaService->getInstasByHashtag($keyword, 50);
     }
 }
