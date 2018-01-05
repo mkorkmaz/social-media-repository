@@ -47,7 +47,7 @@ class InstagramTag
     private function getPost(string $shortCode)
     {
         try {
-            echo('Getting post :' . $shortCode) . PHP_EOL;
+            echo('Getting post :' . $shortCode . PHP_EOL);
             $url = str_replace('{code}', $shortCode, 'https://www.instagram.com/p/{code}');
             $client = new GuzzleHttp\Client(['User-Agent' => $this->browserId]);
             $response = $client->get($url);

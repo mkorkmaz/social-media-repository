@@ -62,6 +62,7 @@ class InstaService
     private function savePosts(string $hashtag, array $posts) : void
     {
         foreach ($posts as $post) {
+            echo ('Saving .' . $post['shortCode']. PHP_EOL);
             $this->repository->savePost($hashtag, $post);
         }
     }
