@@ -44,16 +44,20 @@ class InstagramTag
      * @return mixed
      * @throws \RuntimeException
      */
-    public function getPost(string $shortCode)
+    private function getPost(string $shortCode)
     {
-        echo('Getting post :' . $shortCode) . PHP_EOL;
-        $url = str_replace('{code}', $shortCode, 'https://www.instagram.com/p/{code}');
-        $client = new GuzzleHttp\Client(['User-Agent' => $this->browserId]);
-        $response = $client->get($url);
-        $body = $response->getBody()->getContents();
-        preg_match('#<script type="text/javascript">window._sharedData =(.*?);</script>#msi', $body, $match);
-        $data = json_decode($match[1], self::JSON_OBJECT_AS_ARRAY);
-        return $data['entry_data']['PostPage'][0]['graphql']['shortcode_media'];
+        try {
+            echo('Getting post :' . $shortCode) . PHP_EOL;
+            $url = str_replace('{code}', $shortCode, 'https://www.instagram.com/p/{code}');
+            $client = new GuzzleHttp\Client(['User-Agent' => $this->browserId]);
+            $response = $client->get($url);
+            $body = $response->getBody()->getContents();
+            preg_match('#<script type="text/javascript">window._sharedData =(.*?);</script>#msi', $body, $match);
+            $data = json_decode($match[1], self::JSON_OBJECT_AS_ARRAY);
+            return $data['entry_data']['PostPage'][0]['graphql']['shortcode_media'];
+        } catch (\Exception $e) {
+            return $this->getPost($shortCode);
+        }
     }
 
 
