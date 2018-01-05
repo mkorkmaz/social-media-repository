@@ -52,7 +52,7 @@ class InstaService
                     'username' => $post['owner']['username'],
                     'fullName' => $post['owner']['full_name'],
                     'profilePicUrl' => $post['owner']['profile_pic_url'],
-                    'isPrivate' => (int) $post['user']['is_private']
+                    'isPrivate' => (int) $post['owner']['is_private']
                 ]
             ];
         }
