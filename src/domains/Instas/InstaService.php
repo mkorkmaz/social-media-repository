@@ -46,8 +46,13 @@ class InstaService
                 'caption' => $post['edge_media_to_caption']['edges'][0]['node']['text'],
                 'ownerId' => $post['owner']['id'],
                 'likesCount' => $post['edge_media_preview_like']['count'],
-                'locationId' => '',
-                'locationName' => '',
+                'location' => [
+                    'id' => $post['location']['id'] ?? null,
+                    'name' => $post['location']['name'] ?? '',
+                    'slug' => $post['location']['slug'] ?? '',
+                ],
+                'videoStandardResolutionUrl' => $post['video_url'] ?? '',
+                'videoViews' => (int) ($post['video_view_count'] ?? 0),
                 'owner' => [
                     'username' => $post['owner']['username'],
                     'fullName' => $post['owner']['full_name'],
