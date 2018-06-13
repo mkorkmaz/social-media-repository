@@ -19,7 +19,8 @@ class GetInstasCommand extends SelamiCommand
             ->setDefinition(
                 [
                 new InputArgument('queryType', InputArgument::REQUIRED),
-                new InputArgument('keyword', InputArgument::REQUIRED),
+                    new InputArgument('keyword', InputArgument::REQUIRED),
+                    new InputArgument('output', InputArgument::OPTIONAL),
 
                 ]
             );
@@ -34,9 +35,10 @@ class GetInstasCommand extends SelamiCommand
     {
         $queryType = $input->getArgument('queryType');
         $keyword = $input->getArgument('keyword');
+        $outputDir = $input->getArgument('output', '');
         $output->writeln(date('Y-m-d H:i:s').': Getting instagram posts for ' . $queryType . ':'. $keyword);
         $output->writeln('------------------------------------');
-        $posts = $this->getInstas($queryType, $keyword);
+        $posts = $this->getInstas($queryType, $keyword, $outputDir);
         $output->writeln(date('Y-m-d H:i:s').': DONE: ');
     }
 
@@ -46,7 +48,7 @@ class GetInstasCommand extends SelamiCommand
      * @return array|null
      * @throws \Exception
      */
-    private function getInstas(string $queryType, string $keyword) : ?array
+    private function getInstas(string $queryType, string $keyword, string $outputDir) : ?array
     {
         /**
          * @param \SocialMediaRepository\Domain\Instas\InstaService $instaService
@@ -55,6 +57,6 @@ class GetInstasCommand extends SelamiCommand
         if ($queryType === 'user') {
             return $instaService->getInstasByUsername($keyword);
         }
-        return $instaService->getInstasByHashtag($keyword, 50);
+        return $instaService->getInstasByHashtag($keyword, 50, $outputDir);
     }
 }

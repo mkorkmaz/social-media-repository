@@ -8,6 +8,7 @@ $container = new Slim\Container;
 $container['config'] = $config;
 $container['commands'] =
     [
+        Command\GetTweetsCommand::class,
         Command\GetInstasCommand::class,
     ];
 $container['soupmix'] = function($c) {
@@ -26,6 +27,17 @@ $container['InstaRepository'] = function ($c) {
     return new $class($c->get('soupmix'));
 };
 
+$container['TweetRepository'] = function ($c) {
+    $class = SocialMediaRepository\Domain\Tweets\TweetRepository::class;
+    return new $class($c->get('soupmix'));
+};
+
+$container['TwitterService'] = function ($c) {
+    $config = $c['config'];
+    $class = SocialMediaRepository\Domain\Tweets\TweetService::class;
+    $repository = $c->get('TweetRepository');
+    return new $class($repository, $config);
+};
 
 $container['InstagramService'] = function ($c) {
     $config = $c['config'];

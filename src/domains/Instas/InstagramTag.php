@@ -18,7 +18,12 @@ class InstagramTag
         $this->url = str_replace('{tag}', $tagName, 'https://www.instagram.com/explore/tags/{tag}/');
     }
 
-    public function getPosts(int $limit=10)
+    /**
+     * @param int $limit
+     * @return array
+     * @throws \RuntimeException
+     */
+    public function getPosts(int $limit=10) : array
     {
         $client = new GuzzleHttp\Client(['User-Agent' => $this->browserId]);
         $response = $client->get($this->url);
@@ -44,7 +49,7 @@ class InstagramTag
      * @return mixed
      * @throws \RuntimeException
      */
-    private function getPost(string $shortCode)
+    private function getPost(string $shortCode) : array
     {
         try {
             echo('Getting post :' . $shortCode . PHP_EOL);

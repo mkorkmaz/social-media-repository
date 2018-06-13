@@ -12,5 +12,5 @@ interface RepositoryInterface
 
     public function getPosts(string $hashtag, string $maxId);
 
-    public function savePost(string $hashtag, array $postData);
+    public function savePost(string $hashtag, array $postData, ?string $outputDir);
 }

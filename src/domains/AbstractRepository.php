@@ -44,6 +44,8 @@ abstract class AbstractRepository implements RepositoryInterface
     {
         $postData['_platformId'] = $platformId;
         $postData['_hashtag'] = $hashtag;
+
+
         if ($this->doesPostExist($platformId, $hashtag, $postData['postId'])) {
             return null;
         }
@@ -68,5 +70,21 @@ abstract class AbstractRepository implements RepositoryInterface
             return false;
         }
         return true;
+    }
+
+    protected function savePostByPlatformIdOnFS(int $platformId, string $hashtag, array $postData, ?string $fileLocation) : ?int
+    {
+        $postData['_platformId'] = $platformId;
+        $postData['_hashtag'] = $hashtag;
+        $filePath = $fileLocation. '/'. $postData['postId'].'.json';
+
+        if (! is_dir($fileLocation)) {
+            mkdir($fileLocation, 0777, true);
+        }
+        if (file_exists($fileLocation)) {
+            return 0;
+        }
+
+        return file_put_contents($filePath, json_encode($postData, JSON_OBJECT_AS_ARRAY));
     }
 }

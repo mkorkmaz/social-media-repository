@@ -6,8 +6,6 @@ namespace SocialMediaRepository\Domain\Instas;
 
 class InstaService
 {
-    private $instagramHandler;
-
     private $repository;
 
     private $config;
@@ -15,20 +13,19 @@ class InstaService
     public function __construct(InstaRepository $repository, $config)
     {
         $this->repository = $repository;
-        $this->config = $config['instagram'];
     }
 
     /**
-     * @param string $hashtag
+     * @param string $tag
      * @param int    $limit
      * @return void
      * @throws \Exception
      */
-    public function getInstasByHashtag(string $hashtag, int $limit) : void
+    public function getInstasByHashtag(string $tag, int $limit, string $outputDir) : void
     {
-       $instagram = new InstagramTag($hashtag);
+       $instagram = new InstagramTag($tag);
        $extractedData = $this->extractData($instagram->getPosts($limit));
-       $this->savePosts($hashtag, $extractedData);
+       $this->savePosts($tag, $extractedData, $outputDir);
     }
 
     private function extractData(array $posts) : array
@@ -64,16 +61,16 @@ class InstaService
         return $extractedData;
     }
 
-    private function savePosts(string $hashtag, array $posts) : void
+    private function savePosts(string $tag, array $posts, string $outputDir) : void
     {
         foreach ($posts as $post) {
             echo ('Saving .' . $post['shortCode']. PHP_EOL);
-            $this->repository->savePost($hashtag, $post);
+            $this->repository->savePost($tag, $post, $outputDir);
         }
     }
 
-    public function getPosts(string $hastag, string $minId): array
+    public function getPosts(string $tag, string $minId): array
     {
-        return $this->repository->getPosts($hastag, $minId);
+        return $this->repository->getPosts($tag, $minId);
     }
 }

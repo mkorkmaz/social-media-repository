@@ -14,8 +14,12 @@ class InstaRepository extends Domain\AbstractRepository
         return $this->getPostsByPlatformId(self::PLATFORM_ID, $hashtag, $minId);
     }
 
-    public function savePost(string $hashtag, array $postData)
+    public function savePost(string $hashtag, array $postData, ?string $outputDir)
     {
+        if (! empty($outputDir)) {
+            return $this->savePostByPlatformIdOnFS(self::PLATFORM_ID, $hashtag, $postData, $outputDir);
+
+        }
         return $this->savePostByPlatformId(self::PLATFORM_ID, $hashtag, $postData);
     }
 }
