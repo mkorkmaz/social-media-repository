@@ -81,7 +81,7 @@ abstract class AbstractRepository implements RepositoryInterface
         if (! is_dir($fileLocation)) {
             mkdir($fileLocation, 0777, true);
         }
-        if (file_exists($fileLocation)) {
+        if (file_exists($filePath)) {
             return 0;
         }
 
